@@ -28,6 +28,7 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (first.count + second.count == result_val) {
         music.powerUp.play()
         info.changeScoreBy(1)
+        blockSettings.writeNumber("score", info.score())
         for (let index = 0; index <= result.length - 1; index++) {
             result[index].setDigitColor(7)
         }
@@ -45,6 +46,7 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     } else {
         music.powerDown.play()
         info.changeScoreBy(-1)
+        blockSettings.writeNumber("score", info.score())
         for (let index = 0; index <= result.length - 1; index++) {
             result[index].setDigitColor(2)
         }
@@ -119,6 +121,11 @@ for (let index = 0; index <= result.length - 1; index++) {
     result[index].y += 30
     result[index].x += -20 + 20 * index
 }
-info.setScore(0)
+if (blockSettings.readNumber("score") > 0) {
+    info.setScore(blockSettings.readNumber("score"))
+} else {
+    info.setScore(0)
+    blockSettings.writeNumber("score", info.score())
+}
 result_val = 0
 console.logValue("correctResult: ", convertToText(first.count + second.count))

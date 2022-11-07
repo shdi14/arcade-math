@@ -5,7 +5,8 @@
         "device": "*",
         "sevenseg": "*",
         "arcade-text": "github:microsoft/arcade-text#v1.3.0",
-        "controller": "*"
+        "controller": "*",
+        "settings-blocks": "github:microsoft/pxt-settings-blocks#v1.0.0"
     },
     "files": [
         "main.blocks",
