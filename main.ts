@@ -3,12 +3,16 @@ namespace SpriteKind {
 }
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     if (result[curDigit].value < 9) {
+        music.footstep.play()
         result[curDigit].value += 1
         result_val += 1 * 10 ** (2 - curDigit)
         console.logValue("inputResult: ", convertToText(result_val))
+    } else {
+        music.knock.play()
     }
 })
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
+    music.beamUp.play()
     for (let index = 0; index <= result.length - 1; index++) {
         result[index].value = 0
     }
@@ -22,6 +26,7 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     console.logValue("inputResult: ", convertToText(result_val))
     if (first.count + second.count == result_val) {
+        music.powerUp.play()
         info.changeScoreBy(1)
         for (let index = 0; index <= result.length - 1; index++) {
             result[index].setDigitColor(7)
@@ -38,6 +43,7 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         second.count = second_val
         console.logValue("correctResult: ", convertToText(first.count + second.count))
     } else {
+        music.powerDown.play()
         info.changeScoreBy(-1)
         for (let index = 0; index <= result.length - 1; index++) {
             result[index].setDigitColor(2)
@@ -50,23 +56,32 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     if (curDigit > 0) {
+        music.footstep.play()
         curDigit += -1
         up.setPosition(60 + 20 * curDigit, 64)
         down.setPosition(60 + 20 * curDigit, 116)
+    } else {
+        music.knock.play()
     }
 })
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     if (curDigit < 2) {
+        music.footstep.play()
         curDigit += 1
         up.setPosition(60 + 20 * curDigit, 64)
         down.setPosition(60 + 20 * curDigit, 116)
+    } else {
+        music.knock.play()
     }
 })
 controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
     if (result[curDigit].value > 0) {
+        music.footstep.play()
         result[curDigit].value += -1
         result_val += -1 * 10 ** (2 - curDigit)
         console.logValue("inputResult: ", convertToText(result_val))
+    } else {
+        music.knock.play()
     }
 })
 let result_val = 0

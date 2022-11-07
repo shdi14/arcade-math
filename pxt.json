@@ -4,7 +4,8 @@
     "dependencies": {
         "device": "*",
         "sevenseg": "*",
-        "arcade-text": "github:microsoft/arcade-text#v1.3.0"
+        "arcade-text": "github:microsoft/arcade-text#v1.3.0",
+        "controller": "*"
     },
     "files": [
         "main.blocks",
