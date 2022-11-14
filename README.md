@@ -1,8 +1,3 @@
- 
-
-
-> Open this page at [https://shdi14.github.io/math-2/](https://shdi14.github.io/math-2/)
-
 ## Use as Extension
 
 This repository can be added as an **extension** in MakeCode.
