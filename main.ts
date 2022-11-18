@@ -7,43 +7,35 @@ controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
         input2.count += 1 * 10 ** (2 - currentOrder)
     } else {
         music.knock.play()
+        input2.count += -9 * 10 ** (2 - currentOrder)
     }
 })
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
+    music.beamUp.play()
+    input2.count = 0
+    blockSettings.clear()
+    updateStatsView()
+})
+controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (solution == input2.count) {
         music.powerUp.play()
-        info.changeScoreBy(1)
-        blockSettings.writeNumber("score", info.score())
         input2.setDigitColor(7)
         pause(500)
+        blockSettings.writeNumberArray(randomHASHtoText, [level + 1, 2 ** (level + 1)])
+        updateStatsView()
         input2.count = 0
         input2.setDigitColor(11)
-        solution = updateEquation(equationView, signView)
+        info.changeScoreBy(1)
+        randomEquation()
+        firstView.count = first
+        secondView.count = second
+        signView.setText(signToText)
     } else {
         music.powerDown.play()
         input2.setDigitColor(2)
         pause(500)
-        input2.count = 0
         input2.setDigitColor(11)
     }
-})
-function updateEquation (equationView: DigitCounter[], signView: TextSprite[]) {
-    newEquation = randomEquation(20)
-    equationView[0].count = newEquation[1]
-    equationView[1].count = newEquation[2]
-    if (newEquation[0] == 0) {
-        sign = "-"
-        solution = newEquation[1] - newEquation[2]
-    } else {
-        sign = "+"
-        solution = newEquation[1] + newEquation[2]
-    }
-    signView[0].setText(sign)
-    return solution
-}
-controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    music.beamUp.play()
-    input2.count = 0
 })
 function drawArrowSprite (x: number, y: number) {
     arrows = [sprites.create(assets.image`up`, SpriteKind.Arrow), sprites.create(assets.image`down`, SpriteKind.Arrow)]
@@ -78,20 +70,32 @@ function parseInputNumber (inputValue: number, currentOrder: number) {
     inputValues[2] = inputValue % 100 % 10
     return inputValues[currentOrder]
 }
-function randomEquation (maxNumber: number) {
-    equation = [0, 0, 0]
-    equation[0] = randint(0, 1)
-    if (equation[0] == 0) {
-        while (equation[1] <= equation[2]) {
-            equation[1] = randint(1, maxNumber)
-            equation[2] = randint(1, maxNumber)
-            console.logValue("equation", "" + convertToText(equation[1]) + "-" + convertToText(equation[2]))
+function randomEquation () {
+    leftToRepeat = 1
+    while (leftToRepeat > 0) {
+        sign = randint(0, 1)
+        if (sign == 0) {
+            signToText = "-"
+            while (first <= second) {
+                first = randint(1, max)
+                second = randint(1, max)
+            }
+            solution = first - second
+        } else {
+            signToText = "+"
+            first = randint(1, max)
+            second = randint(1, max)
+            solution = first + second
         }
-    } else {
-        equation[1] = randint(1, maxNumber)
-        equation[2] = randint(1, maxNumber)
+        randomHASH = first * second + 10000 ** sign
+        randomHASHtoText = convertToText(randomHASH)
+        HASH = blockSettings.readNumberArray(randomHASHtoText)
+        level = HASH[0]
+        leftToRepeat = HASH[1]
+        if (leftToRepeat > 0) {
+            blockSettings.writeNumberArray(randomHASHtoText, [level, leftToRepeat - 1])
+        }
     }
-    return equation
 }
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     if (currentOrder < 2) {
@@ -103,55 +107,103 @@ controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
         music.knock.play()
     }
 })
+function generateArrayOfHASH () {
+    for (let first = 0; first <= max; first++) {
+        for (let second = 0; second <= max; second++) {
+            for (let sign = 0; sign <= 1; sign++) {
+                randomHASHtoText = convertToText(first * second + 10000 ** sign)
+                if (!(blockSettings.exists(randomHASHtoText))) {
+                    blockSettings.writeNumberArray(randomHASHtoText, [0, 0])
+                }
+            }
+        }
+    }
+    updateStatsView()
+}
 controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
     if (parseInputNumber(input2.count, currentOrder) > 0) {
         music.footstep.play()
         input2.count += -1 * 10 ** (2 - currentOrder)
     } else {
         music.knock.play()
+        input2.count += 9 * 10 ** (2 - currentOrder)
     }
 })
-function drawEquation (equation: number[]) {
-    equationViewReturn = []
-    var1 = drawSevenseg(-40, -20, 7, equation[1], 2)
-    equationViewReturn.push(var1)
-    var2 = drawSevenseg(40, -20, 7, equation[2], 2)
-    equationViewReturn.push(var2)
-    return equationViewReturn
-}
-function drawTextSprite (x: number, y: number, color2: number, text: string) {
-    textSprite = [textsprite.create(text, 0, color2)]
-    textSprite[0].setMaxFontHeight(20)
-    textSprite[0].setPosition(x, y)
+function drawTextSprite (x: number, y: number, color2: number, text: string, fontSize: number) {
+    textSprite = textsprite.create(text, 0, color2)
+    textSprite.setMaxFontHeight(fontSize)
+    textSprite.left = x
+    textSprite.top = y
     return textSprite
 }
-let textSprite: TextSprite[] = []
-let var2: DigitCounter = null
-let var1: DigitCounter = null
-let equationViewReturn: DigitCounter[] = []
+function updateStatsView () {
+    counter = [0]
+    listOfHASH = blockSettings.list()
+    for (let index = 0; index <= listOfHASH.length - 1; index++) {
+        HASH = blockSettings.readNumberArray(listOfHASH[index])
+        level = HASH[0]
+        while (counter.length - 1 < level) {
+            counter.push(0)
+        }
+        counter[level] = counter[level] + 1
+        if (level > 3) {
+        	
+        }
+    }
+    stats = convertToText(counter[0])
+    if (counter[0] == 0) {
+        max = max + 1
+        generateArrayOfHASH()
+    }
+    for (let index = 0; index <= counter.length - 1; index++) {
+        if (index > 0) {
+            stats = "" + stats + "|" + counter[index]
+        }
+    }
+    statsSpriteToArray.setText(stats)
+}
+let stats = ""
+let listOfHASH: string[] = []
+let counter: number[] = []
+let textSprite: TextSprite = null
+let leftToRepeat = 0
 let inputValues: number[] = []
 let myCounter: DigitCounter = null
 let arrows: Sprite[] = []
-let newEquation: number[] = []
-let signView: TextSprite[] = []
-let solution = 0
-let sign = ""
+let level = 0
 let currentOrder = 0
+let statsSpriteToArray: TextSprite = null
 let arrows_2: Sprite[] = []
 let input2: DigitCounter = null
-let equationView: DigitCounter[] = []
-let equation: number[] = []
+let signView: TextSprite = null
+let secondView: DigitCounter = null
+let firstView: DigitCounter = null
+let HASH: number[] = []
+let solution = 0
+let signToText = ""
+let sign = 0
+let second = 0
+let first = 0
+let randomHASHtoText = ""
+let randomHASH = 0
+let max = 0
 info.setScore(0)
-equation = randomEquation(20)
-equationView = drawEquation(equation)
+max = 5
+randomHASH = 0
+randomHASHtoText = ""
+first = 0
+second = 0
+sign = 0
+signToText = "+"
+solution = 0
+HASH = []
+randomEquation()
+firstView = drawSevenseg(-40, -20, 7, first, 2)
+secondView = drawSevenseg(40, -20, 7, second, 2)
+signView = drawTextSprite(70, 30, 5, signToText, 20)
 input2 = drawSevenseg(0, 30, 11, 0, 3)
 arrows_2 = drawArrowSprite(-1, 30)
+statsSpriteToArray = drawTextSprite(0, 0, 5, "", 0)
+updateStatsView()
 currentOrder = 1
-if (equation[0] == 0) {
-    sign = "-"
-    solution = equation[1] - equation[2]
-} else {
-    sign = "+"
-    solution = equation[1] + equation[2]
-}
-signView = drawTextSprite(80, 40, 5, sign)
+signView = drawTextSprite(70, 30, 5, signToText, 20)
