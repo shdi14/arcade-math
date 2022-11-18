@@ -1,20 +1,16 @@
 namespace SpriteKind {
     export const Arrow = SpriteKind.create()
 }
-controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (parseInputNumber(input2.count, currentOrder) < 9) {
-        music.footstep.play()
-        input2.count += 1 * 10 ** (2 - currentOrder)
-    } else {
-        music.knock.play()
-        input2.count += -9 * 10 ** (2 - currentOrder)
-    }
-})
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     music.beamUp.play()
     input2.count = 0
     blockSettings.clear()
-    updateStatsView()
+    max = 2
+    generateArrayOfHASH()
+    randomEquation()
+    firstView.count = first
+    secondView.count = second
+    signView.setText(signToText)
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (solution == input2.count) {
@@ -53,16 +49,6 @@ function drawSevenseg (x: number, y: number, color2: number, num: number, seg: n
     myCounter.y += y
     return myCounter
 }
-controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (currentOrder > 0) {
-        music.footstep.play()
-        currentOrder += -1
-        arrows_2[0].setPosition(60 + 20 * currentOrder, 64)
-        arrows_2[1].setPosition(60 + 20 * currentOrder, 116)
-    } else {
-        music.knock.play()
-    }
-})
 function parseInputNumber (inputValue: number, currentOrder: number) {
     inputValues = [0, 0, 0]
     inputValues[0] = Math.floor(inputValue / 100)
@@ -97,6 +83,39 @@ function randomEquation () {
         }
     }
 }
+function generateArrayOfHASH () {
+    for (let first = 0; first <= max; first++) {
+        for (let second = 0; second <= max; second++) {
+            for (let sign = 0; sign <= 1; sign++) {
+                if (first > 0 && second > 0 && !(first == second && sign == 0)) {
+                    randomHASHtoText = convertToText(first * second + 10000 ** sign)
+                    if (!(blockSettings.exists(randomHASHtoText))) {
+                        blockSettings.writeNumberArray(randomHASHtoText, [0, 0])
+                    }
+                }
+            }
+        }
+    }
+    updateStatsView()
+}
+controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (currentOrder > 0) {
+        music.footstep.play()
+        currentOrder += -1
+        arrows_2[0].setPosition(60 + 20 * currentOrder, 64)
+        arrows_2[1].setPosition(60 + 20 * currentOrder, 116)
+    } else {
+        music.knock.play()
+    }
+})
+controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
+    music.footstep.play()
+    if (parseInputNumber(input2.count, currentOrder) < 9) {
+        input2.count += 1 * 10 ** (2 - currentOrder)
+    } else {
+        input2.count += -9 * 10 ** (2 - currentOrder)
+    }
+})
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     if (currentOrder < 2) {
         music.footstep.play()
@@ -107,28 +126,6 @@ controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
         music.knock.play()
     }
 })
-function generateArrayOfHASH () {
-    for (let first = 0; first <= max; first++) {
-        for (let second = 0; second <= max; second++) {
-            for (let sign = 0; sign <= 1; sign++) {
-                randomHASHtoText = convertToText(first * second + 10000 ** sign)
-                if (!(blockSettings.exists(randomHASHtoText))) {
-                    blockSettings.writeNumberArray(randomHASHtoText, [0, 0])
-                }
-            }
-        }
-    }
-    updateStatsView()
-}
-controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (parseInputNumber(input2.count, currentOrder) > 0) {
-        music.footstep.play()
-        input2.count += -1 * 10 ** (2 - currentOrder)
-    } else {
-        music.knock.play()
-        input2.count += 9 * 10 ** (2 - currentOrder)
-    }
-})
 function drawTextSprite (x: number, y: number, color2: number, text: string, fontSize: number) {
     textSprite = textsprite.create(text, 0, color2)
     textSprite.setMaxFontHeight(fontSize)
@@ -136,33 +133,51 @@ function drawTextSprite (x: number, y: number, color2: number, text: string, fon
     textSprite.top = y
     return textSprite
 }
+controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
+    music.footstep.play()
+    if (parseInputNumber(input2.count, currentOrder) > 0) {
+        input2.count += -1 * 10 ** (2 - currentOrder)
+    } else {
+        input2.count += 9 * 10 ** (2 - currentOrder)
+    }
+})
 function updateStatsView () {
     counter = [0]
     listOfHASH = blockSettings.list()
-    for (let index = 0; index <= listOfHASH.length - 1; index++) {
+    countOfHASHes = listOfHASH.length - 1
+    DEBUG = []
+    DEBUG2 = []
+    for (let index = 0; index <= countOfHASHes; index++) {
         HASH = blockSettings.readNumberArray(listOfHASH[index])
         level = HASH[0]
         while (counter.length - 1 < level) {
             counter.push(0)
         }
         counter[level] = counter[level] + 1
-        if (level > 3) {
-        	
+        if (level == 0) {
+            DEBUG.push(listOfHASH[index])
+            DEBUG2.push(HASH)
         }
     }
     stats = convertToText(counter[0])
-    if (counter[0] == 0) {
-        max = max + 1
-        generateArrayOfHASH()
-    }
     for (let index = 0; index <= counter.length - 1; index++) {
         if (index > 0) {
             stats = "" + stats + "|" + counter[index]
         }
     }
+    if (lastCountOfHASHes < countOfHASHes) {
+        stats = "" + stats + " +" + counter[0]
+        lastCountOfHASHes = countOfHASHes
+    }
     statsSpriteToArray.setText(stats)
+    if (counter[0] == 0) {
+        max = max + 1
+        generateArrayOfHASH()
+    }
 }
 let stats = ""
+let DEBUG2: number[][] = []
+let DEBUG: string[] = []
 let listOfHASH: string[] = []
 let counter: number[] = []
 let textSprite: TextSprite = null
@@ -187,8 +202,12 @@ let first = 0
 let randomHASHtoText = ""
 let randomHASH = 0
 let max = 0
+let lastCountOfHASHes = 0
+let countOfHASHes = 0
 info.setScore(0)
-max = 5
+countOfHASHes = blockSettings.list().length - 1
+lastCountOfHASHes = countOfHASHes
+max = Math.sqrt(parseFloat(blockSettings.list()[lastCountOfHASHes]) - 10000)
 randomHASH = 0
 randomHASHtoText = ""
 first = 0
