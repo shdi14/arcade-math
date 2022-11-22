@@ -1,18 +1,13 @@
 {
-    "name": "math-arcade",
+    "name": "math",
     "description": "",
     "dependencies": {
         "device": "*",
         "sevenseg": "*",
         "settings-blocks": "github:microsoft/pxt-settings-blocks#v1.0.0",
-        "tilemaps": "github:microsoft/pxt-tilemaps#v1.12.0",
-        "Timers": "github:microsoft/arcade-timers#v1.1.0",
         "arcade-text": "github:microsoft/arcade-text#v1.3.0",
-        "Sprite Grid": "github:microsoft/arcade-grid#v1.3.0",
-        "arcade-tile-util": "github:microsoft/arcade-tile-util#v1.0.1",
-        "jacdac": "github:microsoft/pxt-jacdac#v1.8.35",
-        "jacdac-e-co2": "github:microsoft/pxt-jacdac/e-co2",
-        "Color Fading": "github:jwunderl/pxt-color#v0.2.2"
+        "Color Fading": "github:jwunderl/pxt-color#v0.2.2",
+        "feather": "*"
     },
     "files": [
         "main.blocks",
@@ -20,15 +15,12 @@
         "README.md",
         "assets.json",
         "jacdac.json",
-        "jacdac.ts",
         "tilemap.g.jres",
         "tilemap.g.ts",
         "images.g.jres",
         "images.g.ts"
     ],
-    "testFiles": [
-        "test.ts"
-    ],
+    "testFiles": [],
     "targetVersions": {
         "branch": "v1.11.37",
         "tag": "v1.11.37",
